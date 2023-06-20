@@ -1,0 +1,204 @@
+const URL_ENDPOINT = 'https://648e9ffa75a96b6644441eb6.mockapi.io/customers';
+
+/**
+ * drawTable
+ *
+ * Renders the table to the page.
+ *
+ * The function removes all td elements from the webpage.
+ * Then, an API call is made which retrieves data from a server.
+ * Once the data is retrieved, the map() method is called on it to create a new Object or array with the given data
+ * Inside the map() function, a new tr element is created in the table for each subscriber of the API data.
+ * Each subscriber's data is added to appropriate td element and buttons for update and delete functionalities are also added to each row.
+ * Finally, each  table row is appended to the existing table, which has an ID of list.
+ */
+function drawTable() {
+   console.log('drawTable Called');
+   $('td').remove();
+   $.get(URL_ENDPOINT).then(data => {
+      data.map(subscriber => {
+         $('#list').append(
+            $(`<tr>
+        <td>${subscriber.id}</td>
+        <td>${subscriber.accountNumber}</td>
+        <td>${subscriber.userName}</td>
+        <td>${subscriber.lastName}, ${subscriber.firstName}</td>
+        <td>${subscriber.email}</td>
+        <td>${subscriber.createdAt}</td>
+        <td><b>Status:</b> ${subscriber.active}<br><b>Tier:</b> ${subscriber.plan}<br><b>Billed:</b> ${subscriber.billingCycle}<br></td>
+        <td>
+            <button class="btn btn-warning m-1 btn-standard-width" onclick="updateSubscriberScreen(${subscriber.id})">Update</button><br>
+            <button class="btn btn-danger m-1 btn-standard-width" onclick="deleteSubscriber(${subscriber.id})">Delete</button>
+        </td>
+      </tr>`)
+         );
+      });
+   });
+}
+
+/**
+ * validateFormData
+ *
+ * The code creates a new Date object and formats it to display the current date.
+ * Next, it generates a random number and formats it to display a six-digit account number.
+ * The code checks whether certain form field values are empty.
+ * If any of them are empty, the function returns "false" to indicate that the form data is not valid.
+ * If all the required fields are filled, the function updates the account number field with the generated account number, and returns "true" to indicate that the form data is valid.
+ */
+function validateFormData() {
+   const today = new Date().toISOString().substring(0, 10);
+   const newAcct = `2023-${Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, '0')}`;
+
+   if (
+      $('#firstName').val() === '' ||
+      $('#lastName').val() === '' ||
+      $('#userName').val() === '' ||
+      $('#email').val() === ''
+   ) {
+      console.log('validateFormData FALSE');
+      return false;
+   }
+   console.log('validateFormData TRUE');
+   $('#createdDate').val(today);
+   $('#accountNumber').val(newAcct);
+   return true;
+}
+
+/**
+ * This code adds a click event listener to the element with the ID "submit-button".
+ * When clicked, it checks if the formData is valid by calling the "validateFormData" function.
+ * If it is valid, it sends a POST request to the URL endpoint with the data entered into the form.
+ * Finally, this code reloads the page after the POST request is complete.
+ */
+$('#submit-button').on('click', e => {
+   e.preventDefault();
+   console.log('submit-button clicked');
+   if (validateFormData()) {
+      console.log('all required fields have been entered');
+
+      console.log($('#createdDate').val());
+      $.post(URL_ENDPOINT, {
+         firstName: $('#firstName').val(),
+         lastName: $('#lastName').val(),
+         userName: $('#userName').val(),
+         email: $('#email').val(),
+         accountNumber: $('#accountNumber').val(),
+         createdAt: $('#createdDate').val(),
+         plan: $('#plan').val(),
+         billingCycle: $('#billingCycle').val(),
+         active: $('#isActive').val(),
+      }).then(() => {
+         location.reload();
+      });
+   }
+});
+
+/**
+ * The code adds an event listener to a button with the ID 'clear-form-button'.
+ * When the button is clicked, the current date is assigned to the variable 'today'.
+ * Then the input fields with the IDs 'firstName', 'lastName', 'userName', 'email', and 'accountNumber' are cleared.
+ */
+$('#clear-form-button').on('click', e => {
+   e.preventDefault();
+   console.log('clear-form-button clicked');
+   let today = new Date();
+   $('#firstName').val('');
+   $('#lastName').val('');
+   $('#userName').val('');
+   $('#email').val('');
+   $('#accountNumber').val('');
+});
+
+/**
+ * updateSubscriberScreen(id)
+ *
+ * This function updates the subscriber's information displayed on the screen upon receiving the subscriber's id.
+ * Then, it makes an AJAX request to GET information for the subscriber with the given id.
+ * If the GET request is successful, the callback updates the modal fields with the subscriber's information.
+ * Finally it populates the modal with the updated subscriber information.
+ */
+function updateSubscriberScreen(id) {
+   console.log(`updateSubscriberScreen Called for id:${id}`);
+   // get info for subscriber
+   // populate modal fields with subscriber info
+   $.ajax(`${URL_ENDPOINT}/${id}`, {
+      method: 'GET',
+   }).then(subscriber => {
+      console.log(subscriber);
+      $('#accountNumberModal').text(`Account #: ${subscriber.accountNumber}`);
+      $('#firstNameModal').val(subscriber.firstName);
+      $('#lastNameModal').val(subscriber.lastName);
+      $('#userNameModal').val(subscriber.userName);
+      $('#emailModal').val(subscriber.email);
+      $('#planModal').val(subscriber.plan);
+      $('#billingCycleModal').val(subscriber.billingCycle);
+      $('#isActiveModal').val(subscriber.active);
+
+      // Show Modal with id parameter
+      $('#updateSubscriberModal').modal('show').data('id', id);
+   });
+}
+
+/**
+ * Event Listener for modal Update button
+ *
+ * This code selects an HTML element with the ID "updateButton" and adds a click event listener to it.
+ * When the button is clicked, the code retrieves the ID value from an HTML element with the ID "updateSubscriberModal".
+ * Then it calls the "updateSubscriber" function with the ID as a parameter.
+ */
+$('#updateButton').on('click', () => {
+   const id = $('#updateSubscriberModal').data('id');
+   updateSubscriber(id);
+});
+
+/**
+ * updateSubscriber(id)
+ *
+ * This function takes an "id" parameter and updates a subscriber record with that id.
+ * It then makes an AJAX call to the endpoint URL with the subscriber id passed in, using the PUT method.
+ * The content type is set to application/json and the function serializes the data into JSON using the JSON.stringify() method.
+ * The function then redraws the table
+ */
+function updateSubscriber(id) {
+   console.log('updateSubscriber Called');
+   console.log(`ID: ${id}`);
+   $.ajax(`${URL_ENDPOINT}/${id}`, {
+      method: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+         firstName: $('#firstNameModal').val(),
+         lastName: $('#lastNameModal').val(),
+         userName: $('#userNameModal').val(),
+         email: $('#emailModal').val(),
+         plan: $('#planModal').val(),
+         billingCycle: $('#billingCycleModal').val(),
+         active: $('#isActiveModal').val(),
+      }),
+   })
+      .then(drawTable)
+      .then(() => console.log(`Subscriber: ${id} Updated`));
+}
+
+/**
+ * deleteSubscriber(id)
+ *
+ * This is a JavaScript function that deletes a subscriber.
+ * The function takes one parameter, which is the ID of the subscriber to be deleted.
+ * It then sends an HTTP DELETE request with the ID of the subscriber appended to the URL as a parameter.
+ * After sending the DELETE request, the function calls the drawTable function.
+ */
+function deleteSubscriber(id) {
+   console.log('deleteSubscriber Called');
+   $.ajax(`${URL_ENDPOINT}/${id}`, {
+      method: 'DELETE',
+   })
+      .then(drawTable)
+      .then(() => console.log(`Subscriber: ${id} Deleted`));
+}
+
+//draw table upon initial page load.
+document.addEventListener('DOMContentLoaded', () => {
+   drawTable();
+});
