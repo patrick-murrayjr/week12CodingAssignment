@@ -109,7 +109,6 @@ $('#clear-form-button').on('click', e => {
    $('#lastName').val('');
    $('#userName').val('');
    $('#email').val('');
-   $('#accountNumber').val('');
 });
 
 /**
