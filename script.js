@@ -40,18 +40,12 @@ function drawTable() {
  * validateFormData()
  *
  * The code creates a new Date object and formats it to display the current date.
- * Next, it generates a random number and formats it to display a six-digit account number.
- * It then prepends the year to the beggining of the account so it takes the format 2023-123456
  * The code then checks whether the required form input values are empty.
  * If any of them are empty, the function returns "false" to indicate that the form data is not valid.
- * If all the required fields are filled, the function updates the account number field with the generated account number,
- *  and returns "true" to indicate that the form data is valid.
+ * If all the required fields are filled, the function returns "true" to indicate that the form data is valid.
  */
 function validateFormData() {
    const today = new Date().toISOString().substring(0, 10);
-   const newAcct = `2023-${Math.floor(Math.random() * 1000000)
-      .toString()
-      .padStart(6, '0')}`;
 
    if (
       $('#firstName').val() === '' ||
@@ -64,14 +58,15 @@ function validateFormData() {
    }
    // console.log('validateFormData TRUE');
    $('#createdDate').val(today);
-   $('#accountNumber').val(newAcct);
    return true;
 }
 
 /**
  * This code adds a click event listener to the submit-button
  * When clicked, it checks if the form data is valid by calling the validateFormData() function.
- * If it is valid, it sends a POST request to the URL endpoint with the data entered into the form.
+ * If it is valid, it generates a random number and formats it to display a six-digit account number.
+ * It then prepends the year to the beggining of the account so it takes the format 2023-123456
+ * Then, it sends a POST request to the URL endpoint with the data entered into the form.
  * Finally, this code reloads the page after the POST request is complete.
  */
 $('#submit-button').on('click', e => {
@@ -80,13 +75,17 @@ $('#submit-button').on('click', e => {
    if (validateFormData()) {
       // console.log('all required fields have been entered');
 
-      // console.log($('#createdDate').val());
+      // create randomly generated dummy account number
+      const newAcct = `2023-${Math.floor(Math.random() * 1000000)
+         .toString()
+         .padStart(6, '0')}`;
+
       $.post(URL_ENDPOINT, {
          firstName: $('#firstName').val(),
          lastName: $('#lastName').val(),
          userName: $('#userName').val(),
          email: $('#email').val(),
-         accountNumber: $('#accountNumber').val(),
+         accountNumber: newAcct,
          createdAt: $('#createdDate').val(),
          plan: $('#plan').val(),
          billingCycle: $('#billingCycle').val(),
@@ -130,6 +129,7 @@ function updateSubscriberScreen(id) {
    }).then(subscriber => {
       // console.log(subscriber);
       $('#accountNumberModal').text(`Account #: ${subscriber.accountNumber}`);
+      $('#dateCreatedModal').text(`Member since: ${subscriber.createdAt}`);
       $('#firstNameModal').val(subscriber.firstName);
       $('#lastNameModal').val(subscriber.lastName);
       $('#userNameModal').val(subscriber.userName);
