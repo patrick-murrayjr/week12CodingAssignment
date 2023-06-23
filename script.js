@@ -47,6 +47,12 @@ function drawTable() {
 function validateFormData() {
    const today = new Date().toISOString().substring(0, 10);
 
+   function showRequiredMessage() {
+      setTimeout(() => {
+         $('#requiredMessage').addClass('d-none');
+      }, 3000);
+   }
+
    if (
       $('#firstName').val() === '' ||
       $('#lastName').val() === '' ||
@@ -54,6 +60,8 @@ function validateFormData() {
       $('#email').val() === ''
    ) {
       // console.log('validateFormData FALSE');
+      $('#requiredMessage').removeClass('d-none');
+      showRequiredMessage();
       return false;
    }
    // console.log('validateFormData TRUE');
