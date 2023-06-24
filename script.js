@@ -66,8 +66,7 @@ $('#form').on('submit', e => {
    }).then(() => {
       //redraw table and then clear form fields
       drawTable();
-      document.getElementById('form').reset();
-      $('#createdDate').val(today);
+      clearForm();
    });
 });
 
@@ -79,14 +78,13 @@ $('#form').on('submit', e => {
  */
 $('#clear-form-button').on('click', e => {
    e.preventDefault();
-   // console.log('clear-form-button clicked');
-   $('#firstName').val('');
-   $('#lastName').val('');
-   $('#userName').val('');
-   $('#email').val('');
-   $('#createdDate').val(today);
+   clearForm();
 });
 
+function clearForm() {
+   document.getElementById('form').reset();
+   $('#createdDate').val(today);
+}
 /**
  * updateSubscriberScreen(id)
  *
