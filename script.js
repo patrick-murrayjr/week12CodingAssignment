@@ -72,15 +72,19 @@ $('#form').on('submit', e => {
 
 /**
  * The code adds an event listener to the clear-form-button.
- * When the button is clicked, the current date is assigned to the variable 'today'.
- * Then the input fields; 'firstName', 'lastName', 'userName', 'email', and 'accountNumber' are cleared
- * and then it repopulates the createdDate field with today's date
+ * when the button is clicked teh ClearForm function is invoked.
  */
 $('#clear-form-button').on('click', e => {
    e.preventDefault();
    clearForm();
 });
 
+/**
+ *  clearForm()
+ *
+ * This function resete=s the form to clear all text from the input fields.
+ * Then it populates the createdDate field with today's date
+ */
 function clearForm() {
    document.getElementById('form').reset();
    $('#createdDate').val(today);
