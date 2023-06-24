@@ -1,5 +1,6 @@
 const URL_ENDPOINT = 'https://648e9ffa75a96b6644441eb6.mockapi.io/customers';
-
+const today = new Date().toISOString().substring(0, 10);
+$('#createdDate').val(today);
 /**
  * drawTable()
  *
@@ -14,8 +15,9 @@ const URL_ENDPOINT = 'https://648e9ffa75a96b6644441eb6.mockapi.io/customers';
  */
 function drawTable() {
    // console.log('drawTable Called');
-   $('td').remove();
+
    $.get(URL_ENDPOINT).then(data => {
+      $('td').remove();
       data.map(subscriber => {
          $('#list').append(
             $(`<tr>
@@ -37,86 +39,52 @@ function drawTable() {
 }
 
 /**
- * validateFormData()
- *
- * The code creates a new Date object and formats it to display the current date.
- * The code then checks whether the required form input values are empty.
- * If any of them are empty, the function returns "false" to indicate that the form data is not valid.
- * If all the required fields are filled, the function returns "true" to indicate that the form data is valid.
- */
-function validateFormData() {
-   const today = new Date().toISOString().substring(0, 10);
-
-   function showRequiredMessage() {
-      setTimeout(() => {
-         $('#requiredMessage').addClass('d-none');
-      }, 3000);
-   }
-
-   if (
-      $('#firstName').val() === '' ||
-      $('#lastName').val() === '' ||
-      $('#userName').val() === '' ||
-      $('#email').val() === ''
-   ) {
-      // console.log('validateFormData FALSE');
-      $('#requiredMessage').removeClass('d-none');
-      showRequiredMessage();
-      return false;
-   }
-   // console.log('validateFormData TRUE');
-   $('#createdDate').val(today);
-   return true;
-}
-
-/**
  * This code adds a click event listener to the submit-button
- * When clicked, it checks if the form data is valid by calling the validateFormData() function.
- * If it is valid, it generates a random number and formats it to display a six-digit account number.
+ * When clicked, it generates a random number and formats it to display a six-digit account number.
  * It then prepends the year to the beggining of the account so it takes the format 2023-123456
  * Then, it sends a POST request to the URL endpoint with the data entered into the form.
- * Finally, this code reloads the page after the POST request is complete.
+ * Finally, this code rests the values in the form and repopulates the createdDate field with today's date
+ *  after the POST request is complete.
  */
-$('#submit-button').on('click', e => {
+$('#form').on('submit', e => {
    e.preventDefault();
    // console.log('submit-button clicked');
-   if (validateFormData()) {
-      // console.log('all required fields have been entered');
+   const newAcct = `2023-${Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, '0')}`;
 
-      // create randomly generated dummy account number
-      const newAcct = `2023-${Math.floor(Math.random() * 1000000)
-         .toString()
-         .padStart(6, '0')}`;
-
-      $.post(URL_ENDPOINT, {
-         firstName: $('#firstName').val(),
-         lastName: $('#lastName').val(),
-         userName: $('#userName').val(),
-         email: $('#email').val(),
-         accountNumber: newAcct,
-         createdAt: $('#createdDate').val(),
-         plan: $('#plan').val(),
-         billingCycle: $('#billingCycle').val(),
-         active: $('#isActive').val(),
-      }).then(() => {
-         location.reload();
-      });
-   }
+   $.post(URL_ENDPOINT, {
+      firstName: $('#firstName').val(),
+      lastName: $('#lastName').val(),
+      userName: $('#userName').val(),
+      email: $('#email').val(),
+      accountNumber: newAcct,
+      createdAt: $('#createdDate').val(),
+      plan: $('#plan').val(),
+      billingCycle: $('#billingCycle').val(),
+      active: $('#isActive').val(),
+   }).then(() => {
+      //redraw table and then clear form fields
+      drawTable();
+      document.getElementById('form').reset();
+      $('#createdDate').val(today);
+   });
 });
 
 /**
  * The code adds an event listener to the clear-form-button.
  * When the button is clicked, the current date is assigned to the variable 'today'.
- * Then the input fields; 'firstName', 'lastName', 'userName', 'email', and 'accountNumber' are cleared.
+ * Then the input fields; 'firstName', 'lastName', 'userName', 'email', and 'accountNumber' are cleared
+ * and then it repopulates the createdDate field with today's date
  */
 $('#clear-form-button').on('click', e => {
    e.preventDefault();
    // console.log('clear-form-button clicked');
-   let today = new Date();
    $('#firstName').val('');
    $('#lastName').val('');
    $('#userName').val('');
    $('#email').val('');
+   $('#createdDate').val(today);
 });
 
 /**
@@ -208,4 +176,5 @@ function deleteSubscriber(id) {
 //draw table upon initial page load.
 document.addEventListener('DOMContentLoaded', () => {
    drawTable();
+   $('#createdDate').val(today);
 });
