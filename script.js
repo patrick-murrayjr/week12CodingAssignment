@@ -1,6 +1,6 @@
 const URL_ENDPOINT = 'https://648e9ffa75a96b6644441eb6.mockapi.io/customers';
 const today = new Date().toISOString().substring(0, 10);
-$('#createdDate').val(today);
+
 /**
  * drawTable()
  *
